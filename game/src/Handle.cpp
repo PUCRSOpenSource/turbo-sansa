@@ -8,6 +8,11 @@ Handle::~Handle(void)
 {
 
 }
+Handle* Handle::Instance()
+{
+        static Handle instance;
+        return &instance;
+}
 void Handle::draw(void)
 {
         //handleKeys();
@@ -15,12 +20,12 @@ void Handle::draw(void)
 
 void Handle::keyboard(unsigned char key, int x, int y)
 {
-        keys[key] = true;
+        Instance()->keys[key] = true;
 }
 
 void Handle::specialKeys(int key, int x, int y)
 {
-        keys[key] = true;
+        Instance()->keys[key] = true;
 }
 
 void Handle::handleKeys()
