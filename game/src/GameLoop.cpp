@@ -1,4 +1,3 @@
-
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
@@ -10,146 +9,138 @@
 #include <iostream>
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <vector>
 
+#define SENS_ROT	5.0
+#define SENS_OBS	10.0
+#define SENS_TRANSL	30.0
 using namespace std;
 
-std::vector<GameObject*> enemies;
-std::vector<GameObject*> bullets;
-GameObject* ship;
-Map* map;
-float bottomY;
-float topY;
-long timeBefore;
-long timeNow;
+GLfloat rotX, rotY, rotX_ini, rotY_ini;
+GLfloat obsX, obsY, obsZ =200, obsX_ini, obsY_ini, obsZ_ini;
+GLfloat fAspect = 1, angle = 44;
+int x_ini,y_ini,bot;
 
-void draw(void)
+float X = -30;
+float delta = 0.4;
+bool keys[256];
+
+
+void draw(void);
+void drawPlane();
+void ground(void);
+void handleKeys(void);
+void init(void);
+void observer(void);
+
+void keyUp(unsigned char key, int x, int y);
+void keyboard(unsigned char key, int x, int y);
+void resize(GLsizei w, GLsizei h);
+void specKeyUp(int key, int x, int y);
+void specialKeys(int key, int x, int y);
+
+void observer(void)
 {
-        timeNow = glutGet(GLUT_ELAPSED_TIME);
-        if (timeNow - timeBefore > 20) {
-                bottomY += 0.009;
-                topY += 0.009;
-                ship->moveUp();
 
-                for(unsigned int i = 0; i < bullets.size(); i++) {
-                        bullets[i]->moveUp();
-                        bullets[i]->moveUp();
-                }
-
-                for(unsigned int i = 0; i < enemies.size(); i++) {
-                        enemies[i]->zigzag();
-                }
-                timeBefore = timeNow;
-        }
-
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        gluOrtho2D(-1.0,1.0,bottomY,topY);
         glMatrixMode(GL_MODELVIEW);
-        glutReshapeWindow(350, 1050);
-        glClearColor(0.0f,0.0f,0.0f,1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glPushMatrix();
         glLoadIdentity();
-        glPopMatrix();
-        glLoadIdentity();
-        map->drawMap();
-        ship->draw();
-        for (unsigned int i = 0; i < enemies.size(); i++) {
-                enemies[i]->draw();
-        }
-
-        for (unsigned int i = 0; i < bullets.size(); i++) {
-                bullets[i]->draw();
-        }
-
-        for (unsigned int i = 0; i < enemies.size(); i++) {
-                if(ship->hasContact(enemies[i])) 
-                {
-                        std::cout << "You DIED!!!!" << std::endl;
-                        exit(0);
-                }
-                for (unsigned int j = 0; j < bullets.size(); j++) {
-                        if (enemies.size() <= 0) {
-                                break;
-                        }
-                        if (bullets[j]->hasContact(enemies[i])) {
-                                enemies.erase(enemies.begin() + i);
-                                bullets.erase(bullets.begin() + j);
-                        }
-                }
-
-        }    
-        //FIXME
-        if(enemies.size()==0){
-                std::cout << "YOU WIN!!" << std::endl;
-                exit(0);
-        }
-        glFlush();
+        glTranslatef(-obsX,-obsY,-obsZ);
+        glRotatef(rotX,1,0,0);
+        glRotatef(rotY,0,1,0);
+        gluLookAt(0.0,40.0,200.0, 0.0,0.0,0.0, 0.0,1.0,0.0);
+}
+void drawPlane()//Desenha o plano
+{
+        glBegin(GL_POLYGON);
+        glVertex3f(30,0,30);
+        glVertex3f(30,0,0);
+        glVertex3f(0,0,0);
+        glVertex3f(0,0,30);
+        glEnd();
 }
 
-void keyboard(unsigned char key, int x, int y)
-{
-        switch (key) {
-                case 27:
-                        exit(0);
-                        break;
-                case 'a':
-                        if(ship->getX() > -0.9)
-                                ship->moveLeft();
-                        break;
-                case 'd':
-                        if(ship->getX() < 0.9)
-                                ship->moveRight();
-                        break;
-                case 'w':
-                        GameObject* bullet;
-                        bullet = new Bullet(ship->getX(), ship->getY() + 0.12);
-                        bullets.push_back(bullet);
-                        break;
-                default:
-                        break;
-        }
 
-        glutPostRedisplay();
+void ground(void)
+{
+        glPushMatrix();
+        glColor3f(0,1,0);
+        glTranslatef(-100,0,-100);
+        glScalef(200,200,200);
+        drawPlane();
+        glPopMatrix();
+
+        glutSwapBuffers();
 }
 
 void init(void)
 {
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
         glMatrixMode(GL_PROJECTION);
-        bottomY = -1.0;
-        topY = 1.0;
-        gluOrtho2D(-1.0,1.0,bottomY,topY);
-        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        gluPerspective(angle,fAspect,0.5,500);
+        observer();
 }
 
-int main(int argc, const char *argv[])
+void draw(void)
 {
-        int glargc = 0;
-        char *glargv[] = { (char *)"gl", 0 };
-
-        //THE ship
-        ship = new Ship();
-        map = new Map();
-        for (int i = 0; i < 10; i++) {
-                int random = rand() % 10;
-                float frandom = random / 10.0;
-                GameObject* enemy;
-                enemy = new Enemy(0 + frandom, i + frandom, i % 2);
-                enemies.push_back(enemy);
-        }
-
-        glutInit(&glargc,glargv);
-        timeNow = glutGet(GLUT_ELAPSED_TIME);
-        timeBefore = glutGet(GLUT_ELAPSED_TIME);
-        timeNow = glutGet(GLUT_ELAPSED_TIME);
-        glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-        glutInitWindowSize(350,1050);
-        glutCreateWindow("Lollipop");
-        glutDisplayFunc(draw);
-        glutKeyboardFunc (keyboard);
-        glutIdleFunc(draw);
+        handleKeys();
         init();
+        ground();
+}
+
+void resize(GLsizei w, GLsizei h)
+{
+        if ( h == 0 )
+                h = 1;
+        glViewport(0, 0, w/2, h/2);
+        //glViewport(w/2, h/2, w, h);
+        fAspect = (GLfloat)w/(GLfloat)h;
+        init();
+}
+
+//Keys interaction
+void keyboard(unsigned char key, int x, int y)
+{
+        if(key == 27)
+                exit(0);
+
+        keys[key] = true;
+}
+void specialKeys(int key, int x, int y)
+{
+        keys[key] = true;
+}
+void keyUp(unsigned char key, int x, int y)
+{
+        keys[key] = false;
+}
+void specKeyUp(int key, int x, int y)
+{
+        keys[key] = false;
+}
+void handleKeys(void)
+{
+}
+
+int main(void)
+{
+        int argc = 0;
+        char *argv[] = { (char *)"gl", 0 };
+        glutInit(&argc, argv);
+        glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+        glutInitWindowPosition(5,5);
+        glutInitWindowSize(800,800);
+        glutCreateWindow("Turbo Sansa");
+        //glutTimerFunc(33, TimerFunction, 1 ); // 33 ms
+        glutDisplayFunc(draw);
+        glutReshapeFunc(resize);
+        glutKeyboardFunc (keyboard);
+        glutSpecialFunc(specialKeys);
+        glutKeyboardUpFunc(keyUp);
+        glutSpecialUpFunc(specKeyUp);
         glutMainLoop();
+
         return 0;
 }
