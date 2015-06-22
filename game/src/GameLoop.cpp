@@ -26,7 +26,6 @@ float X = -30;
 float delta = 0.4;
 bool keys[256];
 
-
 void draw(void);
 void drawPlane();
 void ground(void);
@@ -50,25 +49,23 @@ void observer(void)
         glRotatef(rotY,0,1,0);
         gluLookAt(0.0,40.0,200.0, 0.0,0.0,0.0, 0.0,1.0,0.0);
 }
-void drawPlane()//Desenha o plano
-{
-        glBegin(GL_POLYGON);
-        glVertex3f(30,0,30);
-        glVertex3f(30,0,0);
-        glVertex3f(0,0,0);
-        glVertex3f(0,0,30);
-        glEnd();
-}
-
 
 void ground(void)
 {
-        glPushMatrix();
-        glColor3f(0,1,0);
-        glTranslatef(-100,0,-100);
-        glScalef(200,200,200);
-        drawPlane();
-        glPopMatrix();
+	glColor3f(0,0,1);
+	glLineWidth(1);
+	glBegin(GL_LINES);
+	for(float z=-1000; z<=1000; z+=8)
+	{
+		glVertex3f(-1000,-0.1f,z);
+		glVertex3f( 1000,-0.1f,z);
+	}
+	for(float x=-1000; x<=1000; x+=8)
+	{
+		glVertex3f(x,-0.1f,-1000);
+		glVertex3f(x,-0.1f,1000);
+	}
+	glEnd();
 
         glutSwapBuffers();
 }
@@ -94,34 +91,25 @@ void resize(GLsizei w, GLsizei h)
 {
         if ( h == 0 )
                 h = 1;
-        glViewport(0, 0, w/2, h/2);
+        glViewport(0, 0, w, h);
         //glViewport(w/2, h/2, w, h);
         fAspect = (GLfloat)w/(GLfloat)h;
         init();
 }
 
-//Keys interaction
-void keyboard(unsigned char key, int x, int y)
+void keyPressed(unsigned char key, int x, int y)
 {
-        if(key == 27)
-                exit(0);
 
-        keys[key] = true;
-}
-void specialKeys(int key, int x, int y)
-{
         keys[key] = true;
 }
 void keyUp(unsigned char key, int x, int y)
 {
         keys[key] = false;
 }
-void specKeyUp(int key, int x, int y)
-{
-        keys[key] = false;
-}
 void handleKeys(void)
 {
+        if (keys[27])
+                exit(0);           
 }
 
 int main(void)
@@ -136,10 +124,8 @@ int main(void)
         //glutTimerFunc(33, TimerFunction, 1 ); // 33 ms
         glutDisplayFunc(draw);
         glutReshapeFunc(resize);
-        glutKeyboardFunc (keyboard);
-        glutSpecialFunc(specialKeys);
+        glutKeyboardFunc(keyPressed); 
         glutKeyboardUpFunc(keyUp);
-        glutSpecialUpFunc(specKeyUp);
         glutMainLoop();
 
         return 0;
