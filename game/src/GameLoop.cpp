@@ -16,11 +16,12 @@ float lastx, lasty;
 bool keys[256];
 
 //positions of the cubes
-float positionz[10];
-float positionx[10];
+float positionz[1000];
+float positionx[1000];
 
 //existing cubes
-bool exist[10];
+int enemies = 10;
+bool exist[1000];
 
 void    cube(void);
 void    cubepositions(void);
@@ -34,19 +35,20 @@ int     main(int argc, char **argv);
 void    mouseMovement(int x, int y);
 void    reshape(int w, int h);
 void    testColisions();
+void    desenhaChao();
 
 void cubepositions (void) { //set the positions of the cubes
 
-        for (int i=0; i<10; i++)
+        for (int i=0; i<1000; i++)
         {
-                positionz[i] = rand()%5 + 1;
-                positionx[i] = rand()%5 + 1;
+                positionz[i] = rand()%100 + 1;
+                positionx[i] = rand()%100 + 1;
         }
 }
 
 //draw the cube
 void cube (void) {
-        for (int i=0; i<15 - 1; i++)
+        for (int i=0; i<1000 - 1; i++)
         {
                 if (exist[i]) {
                         glPushMatrix();
@@ -58,7 +60,7 @@ void cube (void) {
 }
 
 void testColisions (void) {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 1000; i++) {
                 float enemyX = -positionx[i + 1] * 10;
                 float enemyZ = -positionz[i + 1] * 10;
                 if ((xpos < enemyX + 2 && xpos > enemyX - 2) && (zpos < enemyZ + 2 && zpos > enemyZ - 2) ) {
@@ -70,7 +72,7 @@ void testColisions (void) {
 
 void init (void) {
         cubepositions();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 1000; i++) {
                 exist[i] = true;
         }
 }
@@ -98,6 +100,7 @@ void display(void)
         glTranslated(-xpos,0.0f,-zpos);
         glColor3f(1.0f, 1.0f, 1.0f);
         cube();
+        desenhaChao();
         testColisions();
         glutSwapBuffers();
 }
@@ -155,6 +158,16 @@ void keyboard(void)
                 glutLeaveGameMode();
                 exit(0);
         }
+}
+void desenhaChao()
+{
+        glColor3f(0.0f, 1.0f, 0.0f);
+        glBegin(GL_POLYGON);
+        glVertex3f(-1000,-1,-1000);
+        glVertex3f(-1000,-1,-1);
+        glVertex3f(-1,-1,-1);
+        glVertex3f(-1,-1,-1000);
+        glEnd();
 }
 
 void mouseMovement(int x, int y)
