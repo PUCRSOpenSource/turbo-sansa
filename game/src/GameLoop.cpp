@@ -4,6 +4,7 @@
 #include <GL/glut.h>
 #endif
 #include <cmath>
+#include <stdlib.h>
 
 float xpos = 0, ypos = 0, zpos = 0, xrot = 0, yrot = 0, angle=0.0;
 float cRadius = 20.0f; // our radius distance from our character
