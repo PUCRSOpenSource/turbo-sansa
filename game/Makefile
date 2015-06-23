@@ -12,10 +12,10 @@ CFLAGS = -lglut -lGL -lGLU -I$(IDIR) -Wall
 endif
 
 
-_DEPS =  Vector3.h
+_DEPS =  
 DEPS  = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = GameLoop.o Vector3.o
+_OBJ = GameLoop.o 
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: $(SDIR)/%.cpp $(DEPS)

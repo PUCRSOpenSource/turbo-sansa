@@ -3,130 +3,157 @@
 #else
 #include <GL/glut.h>
 #endif
+#include <cmath>
 
-#include "GameObject.h"
-
-#include <iostream>
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <vector>
-
-#define SENS_ROT	5.0
-#define SENS_OBS	10.0
-#define SENS_TRANSL	30.0
-using namespace std;
-
-GLfloat rotX, rotY, rotX_ini, rotY_ini;
-GLfloat obsX, obsY, obsZ =200, obsX_ini, obsY_ini, obsZ_ini;
-GLfloat fAspect = 1, angle = 44;
-int x_ini,y_ini,bot;
-
-float X = -30;
-float delta = 0.4;
+float xpos = 0, ypos = 0, zpos = 0, xrot = 0, yrot = 0, angle=0.0;
+float cRadius = 20.0f; // our radius distance from our character
+float lastx, lasty;
 bool keys[256];
 
-void draw(void);
-void drawPlane();
-void ground(void);
-void handleKeys(void);
-void init(void);
-void observer(void);
+//positions of the cubes
+float positionz[10];
+float positionx[10];
 
-void keyUp(unsigned char key, int x, int y);
-void keyboard(unsigned char key, int x, int y);
-void resize(GLsizei w, GLsizei h);
-void specKeyUp(int key, int x, int y);
-void specialKeys(int key, int x, int y);
+void    cube(void);
+void    cubepositions(void);
+void    display(void);
+void    enable(void);
+void    init(void);
+void    keyPress(unsigned char key, int x, int y);
+void    keyUp(unsigned char key, int x, int y);
+void    keyboard(void);
+int     main(int argc, char **argv);
+void    mouseMovement(int x, int y);
+void    reshape(int w, int h);
 
-void observer(void)
-{
+void cubepositions (void) { //set the positions of the cubes
 
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-        glTranslatef(-obsX,-obsY,-obsZ);
-        glRotatef(rotX,1,0,0);
-        glRotatef(rotY,0,1,0);
-        gluLookAt(0.0,40.0,200.0, 0.0,0.0,0.0, 0.0,1.0,0.0);
+        for (int i=0; i<10; i++)
+        {
+                positionz[i] = rand()%5 + 1;
+                positionx[i] = rand()%5 + 1;
+        }
 }
 
-void ground(void)
-{
-	glColor3f(0,0,1);
-	glLineWidth(1);
-	glBegin(GL_LINES);
-	for(float z=-1000; z<=1000; z+=8)
-	{
-		glVertex3f(-1000,-0.1f,z);
-		glVertex3f( 1000,-0.1f,z);
-	}
-	for(float x=-1000; x<=1000; x+=8)
-	{
-		glVertex3f(x,-0.1f,-1000);
-		glVertex3f(x,-0.1f,1000);
-	}
-	glEnd();
+//draw the cube
+void cube (void) {
+        for (int i=0; i<10 - 1; i++)
+        {
+                glPushMatrix();
+                glTranslated(-positionx[i + 1] * 10, 0, -positionz[i + 1] * 10);
+                glutSolidCube(2);
+                glPopMatrix();
+        }
+}
 
+void init (void) {
+        cubepositions();
+}
+
+void enable (void) {
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);
+        glEnable(GL_COLOR_MATERIAL);
+        glShadeModel(GL_SMOOTH);
+}
+
+void display(void)
+{
+        keyboard();
+        glClearColor (0.0,0.0,0.0,1.0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        enable();
+        glLoadIdentity();
+        glTranslatef(0.0f, 0.0f, -cRadius);
+        glRotatef(xrot,1.0,0.0,0.0);
+        glColor3f(1.0f, 0.0f, 0.0f);
+        glutSolidCube(2);
+        glRotatef(yrot,0.0,1.0,0.0);
+        glTranslated(-xpos,0.0f,-zpos);
+        glColor3f(1.0f, 1.0f, 1.0f);
+        cube();
         glutSwapBuffers();
 }
 
-void init(void)
+void reshape(int w, int h)
 {
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+        glViewport(0, 0, (GLsizei)w, (GLsizei)h);
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        gluPerspective(angle,fAspect,0.5,500);
-        observer();
+        gluPerspective(60, (GLfloat)w/(GLfloat)h, 0.1, 100.0);
+        glMatrixMode(GL_MODELVIEW);
 }
-
-void draw(void)
+void keyPress(unsigned char key, int x, int y)
 {
-        handleKeys();
-        init();
-        ground();
-}
-
-void resize(GLsizei w, GLsizei h)
-{
-        if ( h == 0 )
-                h = 1;
-        glViewport(0, 0, w, h);
-        //glViewport(w/2, h/2, w, h);
-        fAspect = (GLfloat)w/(GLfloat)h;
-        init();
-}
-
-void keyPressed(unsigned char key, int x, int y)
-{
-
         keys[key] = true;
 }
 void keyUp(unsigned char key, int x, int y)
 {
         keys[key] = false;
 }
-void handleKeys(void)
+void keyboard(void)
 {
+        float xrotrad, yrotrad;
+        yrotrad = (yrot/180 * 3.141592654f);
+        xrotrad = (xrot/180 * 3.141592654f);
+
+        if (keys['w'])
+        {
+                xpos   += float(sin(yrotrad));
+                zpos   -= float(cos(yrotrad));
+                ypos   -= float(sin(xrotrad));
+        }
+
+        if (keys['s'])
+        {
+                xpos   -= float(sin(yrotrad));
+                zpos   += float(cos(yrotrad));
+                ypos   += float(sin(xrotrad));
+        }
+
+        if (keys['d'])
+        {
+                xpos   += float(cos(yrotrad)) * 0.5;
+                zpos   += float(sin(yrotrad)) * 0.5;
+        }
+
+        if (keys['a'])
+        {
+                xpos   -= float(cos(yrotrad)) * 0.5;
+                zpos   -= float(sin(yrotrad)) * 0.5;
+        }
+
         if (keys[27])
-                exit(0);           
+        {
+                exit(0);
+        }
 }
 
-int main(void)
+void mouseMovement(int x, int y)
 {
-        int argc = 0;
-        char *argv[] = { (char *)"gl", 0 };
+        int diffx=x-lastx;
+        int diffy=y-lasty;
+        lastx=x;
+        lasty=y;
+        xrot+= (float) diffy;
+        yrot+= (float) diffx;
+}
+
+int main (int argc, char **argv)
+{
         glutInit(&argc, argv);
-        glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-        glutInitWindowPosition(5,5);
-        glutInitWindowSize(800,800);
+        glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
+        glutInitWindowSize(500, 500);
+        glutInitWindowPosition(100, 100);
         glutCreateWindow("Turbo Sansa");
-        //glutTimerFunc(33, TimerFunction, 1 ); // 33 ms
-        glutDisplayFunc(draw);
-        glutReshapeFunc(resize);
-        glutKeyboardFunc(keyPressed); 
+        init();
+        glutDisplayFunc(display);
+        glutIdleFunc(display);
+        glutReshapeFunc(reshape);
+        glutPassiveMotionFunc(mouseMovement);
+        glutKeyboardFunc(keyPress);
         glutKeyboardUpFunc(keyUp);
         glutMainLoop();
-
         return 0;
 }
