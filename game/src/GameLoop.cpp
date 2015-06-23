@@ -5,6 +5,10 @@
 #endif
 #include <cmath>
 #include "Player.h"
+#include <stdlib.h>
+#include <iostream>
+
+using namespace std;
 
 float xpos = 0, ypos = 0, zpos = 0, xrot = 0, yrot = 0, angle=0.0;
 float cRadius = 20.0f; // our radius distance from our character
@@ -14,6 +18,9 @@ bool keys[256];
 //positions of the cubes
 float positionz[10];
 float positionx[10];
+
+//existing cubes
+bool exist[10];
 
 void    cube(void);
 void    cubepositions(void);
@@ -26,6 +33,7 @@ void    keyboard(void);
 int     main(int argc, char **argv);
 void    mouseMovement(int x, int y);
 void    reshape(int w, int h);
+void    testColisions();
 
 void cubepositions (void) { //set the positions of the cubes
 
@@ -38,17 +46,33 @@ void cubepositions (void) { //set the positions of the cubes
 
 //draw the cube
 void cube (void) {
-        for (int i=0; i<10 - 1; i++)
+        for (int i=0; i<15 - 1; i++)
         {
-                glPushMatrix();
-                glTranslated(positionx[i + 1] * 10, 0, positionz[i + 1] * 10);
-                glutSolidCube(2);
-                glPopMatrix();
+                if (exist[i]) {
+                        glPushMatrix();
+                        glTranslated(-positionx[i + 1] * 10, 0, -positionz[i + 1] * 10);
+                        glutSolidCube(2);
+                        glPopMatrix();
+                }
         }
+}
+
+void testColisions (void) {
+        for (int i = 0; i < 10; i++) {
+                float enemyX = -positionx[i + 1] * 10;
+                float enemyZ = -positionz[i + 1] * 10;
+                if ((xpos < enemyX + 2 && xpos > enemyX - 2) && (zpos < enemyZ + 2 && zpos > enemyZ - 2) ) {
+                        exist[i] = false;
+                }
+        }
+        
 }
 
 void init (void) {
         cubepositions();
+        for (int i = 0; i < 10; i++) {
+                exist[i] = true;
+        }
 }
 
 void enable (void) {
@@ -74,6 +98,7 @@ void display(void)
         glTranslated(-xpos,0.0f,-zpos);
         glColor3f(1.0f, 1.0f, 1.0f);
         cube();
+        testColisions();
         glutSwapBuffers();
 }
 
