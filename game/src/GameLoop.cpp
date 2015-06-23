@@ -4,6 +4,7 @@
 #include <GL/glut.h>
 #endif
 #include <cmath>
+#include "Player.h"
 
 float xpos = 0, ypos = 0, zpos = 0, xrot = 0, yrot = 0, angle=0.0;
 float cRadius = 20.0f; // our radius distance from our character
@@ -40,7 +41,7 @@ void cube (void) {
         for (int i=0; i<10 - 1; i++)
         {
                 glPushMatrix();
-                glTranslated(-positionx[i + 1] * 10, 0, -positionz[i + 1] * 10);
+                glTranslated(positionx[i + 1] * 10, 0, positionz[i + 1] * 10);
                 glutSolidCube(2);
                 glPopMatrix();
         }
@@ -133,12 +134,12 @@ void keyboard(void)
 
 void mouseMovement(int x, int y)
 {
-        int diffx=x-lastx;
-        int diffy=y-lasty;
+        int diffx=(float)(x-lastx);
+        int diffy=(float)(y-lasty);
         lastx=x;
         lasty=y;
-        xrot+= (float) diffy;
-        yrot+= (float) diffx;
+        xrot+=  diffy*0.1;
+        yrot+=  diffx;
 }
 
 int main (int argc, char **argv)
