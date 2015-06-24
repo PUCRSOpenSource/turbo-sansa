@@ -95,7 +95,7 @@ void display(void)
 {
         double ttime = (clock() - start) / (double) CLOCKS_PER_SEC;
         if (ttime > 10){
-                cout << "Score: " << enemiesKilled << " PEOPLE KILLED" << endl;
+                cout << "Score: " << enemiesKilled << endl;
                 keys[27] = true;
         }
         keyboard();
