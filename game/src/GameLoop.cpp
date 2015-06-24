@@ -11,6 +11,9 @@
 
 using namespace std;
 
+#define CUBE 0
+#define SPHERE 1
+
 float xpos = 0, ypos = 0, zpos = 0, xrot = 0, yrot = 0, angle=0.0;
 float cRadius = 20.0f; // our radius distance from our character
 float lastx, lasty;
@@ -24,8 +27,8 @@ clock_t start;
 int enemiesKilled = 0;
 
 //existing cubes
-int enemies = 10;
 bool exist[1000];
+int type[1000];
 
 int     main(int argc, char **argv);
 
@@ -41,11 +44,14 @@ void    mouseMovement(int x, int y);
 void    reshape(int w, int h);
 void    testColisions();
 void    desenhaChao();
+void    fall();
 
 void cubepositions (void) { //set the positions of the cubes
 
         for (int i=0; i<1000; i++)
         {
+                type[i] = rand()%2;
+                //cout << type[i] << endl;
                 positionz[i] = rand()%100 + 1;
                 positionx[i] = rand()%100 + 1;
         }
@@ -58,7 +64,10 @@ void cube (void) {
                 if (exist[i]) {
                         glPushMatrix();
                         glTranslated(-positionx[i + 1] * 10, 0, -positionz[i + 1] * 10);
-                        glutSolidCube(2);
+                        if (type[i] == CUBE)
+                                glutSolidCube(2);
+                        if (type[i] == SPHERE)
+                                glutSolidSphere(1, 10, 10);
                         glPopMatrix();
                 }
         }
@@ -69,7 +78,16 @@ void testColisions (void) {
                 float enemyX = -positionx[i + 1] * 10;
                 float enemyZ = -positionz[i + 1] * 10;
                 if ((xpos < enemyX + 2 && xpos > enemyX - 2) && (zpos < enemyZ + 2 && zpos > enemyZ - 2) ) {
-                        enemiesKilled++;
+                        if (exist[i]) {
+                                if (type[i] == CUBE) {
+                                        enemiesKilled += 1;
+                                        cout << "Score: " << enemiesKilled << endl;
+                                }
+                                if (type[i] == SPHERE) {
+                                        enemiesKilled += 5;
+                                        cout << "Score: " << enemiesKilled << endl;
+                                }
+                        } 
                         exist[i] = false;
                 }
         }
@@ -94,7 +112,7 @@ void enable (void) {
 void display(void)
 {
         double ttime = (clock() - start) / (double) CLOCKS_PER_SEC;
-        if (ttime > 10){
+        if (ttime > 3){
                 cout << "Score: " << enemiesKilled << endl;
                 keys[27] = true;
         }
@@ -106,7 +124,7 @@ void display(void)
         glTranslatef(0.0f, 0.0f, -cRadius);
         glRotatef(xrot,1.0,0.0,0.0);
         glColor3f(1.0f, 0.0f, 0.0f);
-        glutSolidCube(2);
+        glutSolidTeapot(2);
         glRotatef(yrot,0.0,1.0,0.0);
         glTranslated(-xpos,0.0f,-zpos);
         glColor3f(1.0f, 1.0f, 1.0f);
