@@ -14,7 +14,7 @@ using namespace std;
 #define CUBE 0
 #define SPHERE 1
 
-float xpos = 0, ypos = 0, zpos = 0, xrot = 0, yrot = 0, angle=0.0;
+float xpos = 0, ypos = 0, zpos = 0, xrot = 0, yrot = 0;
 float cRadius = 20.0f; // our radius distance from our character
 float lastx, lasty;
 bool keys[256];
@@ -23,7 +23,6 @@ bool keys[256];
 float positionz[1000];
 float positionx[1000];
 
-clock_t start;
 int enemiesKilled = 0;
 
 //existing cubes
@@ -43,31 +42,35 @@ void    keyboard(void);
 void    mouseMovement(int x, int y);
 void    reshape(int w, int h);
 void    testColisions();
-void    desenhaChao();
+void    floor();
 void    fall();
+void    playerPosition();
 
 void cubepositions (void) { //set the positions of the cubes
 
         for (int i=0; i<1000; i++)
         {
                 type[i] = rand()%2;
-                //cout << type[i] << endl;
                 positionz[i] = rand()%100 + 1;
                 positionx[i] = rand()%100 + 1;
         }
 }
 
 //draw the cube
-void cube (void) {
+void enemies (void) {
         for (int i=0; i<1000 - 1; i++)
         {
                 if (exist[i]) {
                         glPushMatrix();
                         glTranslated(-positionx[i + 1] * 10, 0, -positionz[i + 1] * 10);
-                        if (type[i] == CUBE)
+                        if (type[i] == CUBE){
+                                glColor3f(0.0f, 1.0f, 1.0f);
                                 glutSolidCube(2);
-                        if (type[i] == SPHERE)
+                        }
+                        if (type[i] == SPHERE){
+                                glColor3f(1.0f, 0.0f, 1.0f);
                                 glutSolidSphere(1, 10, 10);
+                        }
                         glPopMatrix();
                 }
         }
@@ -81,11 +84,9 @@ void testColisions (void) {
                         if (exist[i]) {
                                 if (type[i] == CUBE) {
                                         enemiesKilled += 1;
-                                        cout << "Score: " << enemiesKilled << endl;
                                 }
                                 if (type[i] == SPHERE) {
                                         enemiesKilled += 5;
-                                        cout << "Score: " << enemiesKilled << endl;
                                 }
                         } 
                         exist[i] = false;
@@ -111,8 +112,7 @@ void enable (void) {
 
 void display(void)
 {
-        double ttime = (clock() - start) / (double) CLOCKS_PER_SEC;
-        if (ttime > 3){
+        if (glutGet(GLUT_ELAPSED_TIME) >= 10000) {
                 cout << "Score: " << enemiesKilled << endl;
                 keys[27] = true;
         }
@@ -123,15 +123,21 @@ void display(void)
         glLoadIdentity();
         glTranslatef(0.0f, 0.0f, -cRadius);
         glRotatef(xrot,1.0,0.0,0.0);
-        glColor3f(1.0f, 0.0f, 0.0f);
-        glutSolidTeapot(2);
+        playerPosition();
         glRotatef(yrot,0.0,1.0,0.0);
         glTranslated(-xpos,0.0f,-zpos);
-        glColor3f(1.0f, 1.0f, 1.0f);
-        cube();
-        desenhaChao();
+        enemies();
+        floor();
         testColisions();
         glutSwapBuffers();
+}
+void playerPosition()
+{
+        glColor3f(1.0f, 0.5f, 0.5f);
+        glPushMatrix();
+        glRotatef(90,0.0,1.0,0.0);
+        glutSolidTeapot(2);
+        glPopMatrix();
 }
 
 void reshape(int w, int h)
@@ -188,14 +194,14 @@ void keyboard(void)
                 exit(0);
         }
 }
-void desenhaChao()
+void floor()
 {
         glColor3f(0.0f, 1.0f, 0.0f);
         glBegin(GL_POLYGON);
-        glVertex3f(-1000,-1,-1000);
-        glVertex3f(-1000,-1,-1);
-        glVertex3f(-1,-1,-1);
-        glVertex3f(-1,-1,-1000);
+        glVertex3f(-1000,-1.5,-1000);
+        glVertex3f(-1000,-1.5,-1);
+        glVertex3f(-1,-1.5,-1);
+        glVertex3f(-1,-1.5,-1000);
         glEnd();
 }
 
@@ -214,7 +220,7 @@ int main (int argc, char **argv)
         glutInit(&argc, argv);
         glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
         glutEnterGameMode();
-        start = clock();
+        glutSetCursor(GLUT_CURSOR_NONE);
         init();
         glutDisplayFunc(display);
         glutIdleFunc(display);
