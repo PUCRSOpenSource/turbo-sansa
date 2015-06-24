@@ -7,6 +7,7 @@
 #include "Player.h"
 #include <stdlib.h>
 #include <iostream>
+#include <ctime>
 
 using namespace std;
 
@@ -19,9 +20,14 @@ bool keys[256];
 float positionz[1000];
 float positionx[1000];
 
+clock_t start;
+int enemiesKilled = 0;
+
 //existing cubes
 int enemies = 10;
 bool exist[1000];
+
+int     main(int argc, char **argv);
 
 void    cube(void);
 void    cubepositions(void);
@@ -31,7 +37,6 @@ void    init(void);
 void    keyPress(unsigned char key, int x, int y);
 void    keyUp(unsigned char key, int x, int y);
 void    keyboard(void);
-int     main(int argc, char **argv);
 void    mouseMovement(int x, int y);
 void    reshape(int w, int h);
 void    testColisions();
@@ -64,6 +69,7 @@ void testColisions (void) {
                 float enemyX = -positionx[i + 1] * 10;
                 float enemyZ = -positionz[i + 1] * 10;
                 if ((xpos < enemyX + 2 && xpos > enemyX - 2) && (zpos < enemyZ + 2 && zpos > enemyZ - 2) ) {
+                        enemiesKilled++;
                         exist[i] = false;
                 }
         }
@@ -87,6 +93,11 @@ void enable (void) {
 
 void display(void)
 {
+        double ttime = (clock() - start) / (double) CLOCKS_PER_SEC;
+        if (ttime > 10){
+                cout << "Score: " << enemiesKilled << " PEOPLE KILLED" << endl;
+                keys[27] = true;
+        }
         keyboard();
         glClearColor (0.0,0.0,0.0,1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -185,6 +196,7 @@ int main (int argc, char **argv)
         glutInit(&argc, argv);
         glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
         glutEnterGameMode();
+        start = clock();
         init();
         glutDisplayFunc(display);
         glutIdleFunc(display);
