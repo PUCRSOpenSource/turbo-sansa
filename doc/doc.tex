@@ -23,4 +23,35 @@
 
 \begin{document} 
 
+\maketitle
+
+\begin{abstract}
+  This paper was written as the documentation of the second project of the Computer Graphics I class of PUCRS. It describes a game about a lonely Teapot that has to collect cubes and spheres as fast as it can. The game was written in C++ and uses OpenGL for graphics.
+\end{abstract}
+     
+\begin{resumo} 
+  Este artigo foi escrito como a documentação do segundo projeto da disciplina de Computação Gráfica I da PUCRS. Ele descreve um jogo pode de chá que precisa coletar cubos e esferas o mais rápido o possível. O jogo foi escrito em C++ e utiliza do OpenGL para os gráficos.
+\end{resumo}
+
+
+\section{Informações gerais sobre o jogo}
+
+O jogo consisde de um Teapot em um mundo 3d que tem como objetivo coletar o maximo de objetos antes do tempo acabar. Para coletar os objetos basta andar sobre eles. Cada objeto diferente dá ao player uma pontuação diferente, cubos dando um ponto cada e esferas dando cinco pontos cada, o objetivo do jogo é juntar o máximo de pontos antes do tempo acabar.
+
+\section{Representação}
+
+Os objetos do jogo são representados por um vetor de posições para saber onde desenhá-los, um vetor de tipo, para decidir se são esferas ou cubos e um vetor booleano que representa se já foi coletado ou não. Um objeto já coletado some do mapa, e passar por aquele ponto não garante ao jogador mais pontos.
+
+\section{Formas}
+
+Os objetos do jogo assumem diversas formas, o jogador é um Teapot e os objetos coletáveis são esferas e cubos. Todos os objetos são criados automáticamente pelo opengl com suas funções de \emph{GlutSolidTeapot}, \emph{GlutSolidCube} e \emph{GlutSolidSphere}. Os objetos são posicionados sobre um chão desenhado de tamanho 1000x1000. São 1000 objetos ao todo sem contar o player e o chão.
+
+\section{Movimentação}
+
+A movimentação é feita utilizando-se mouse e teclado, o jogador se move e leva a camera consigo, tendo o jogo a visão de terceira pessoa. O teclado translada o jogador pelo mapa para frente, para trás e para os lados e o mouse rotaciona a câmera. Foi implementada uma maneira de fazer dois botões funcionarem ao mesmo tempo por meio de um vetor de teclas apertadas, podendo o jogador andar para frente e para o lado ao mesmo tempo (na diagonal).
+
+\section{Colisões}
+
+As colisões acontecem quando o jogador se aproxima o suficiente de um outro objeto, estando o centro do jogador a 1 ponto de distância do objeto esse objeto é "coletado", sumindo do mapa e garantindo ao player pontos correspondentes ao seu valor.
+
 \end{document}
